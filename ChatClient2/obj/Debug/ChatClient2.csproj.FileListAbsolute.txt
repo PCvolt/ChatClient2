@@ -1,0 +1,15 @@
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\bin\Debug\ChatClient2.exe.config
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\bin\Debug\ChatClient2.exe
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\bin\Debug\ChatClient2.pdb
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.csprojAssemblyReference.cache
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.Form1.resources
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.Properties.Resources.resources
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.csproj.GenerateResource.cache
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.csproj.CoreCompileInputs.cache
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.exe
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.pdb
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.CreateProfile.resources
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.Login.resources
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\bin\Debug\protobuf-net.dll
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\bin\Debug\protobuf-net.xml
+C:\Users\Paul\source\repos\ChatClient2\ChatClient2\obj\Debug\ChatClient2.csproj.CopyComplete
