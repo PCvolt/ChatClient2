@@ -1,13 +1,7 @@
 ﻿using ProtoBuf;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 using System.Windows.Forms;
 
 
@@ -25,12 +19,14 @@ namespace ChatClient2
 
 		static void sendMessage(NetworkStream ns, Message myMessage)
 		{
-			Serializer.Serialize(ns, myMessage);
+			Byte[] jsonUtf8Bytes = JsonSerializer.SerializeToUtf8Bytes(myMessage);
+
+			ns.Write(jsonUtf8Bytes, 0, jsonUtf8Bytes.Length);
 		}
 
 		private void createProfileBtn_Click(object sender, EventArgs e)
 		{
-			sendMessage(serverStream, new Message(MsgType.login, usernameBox.Text.Trim(), passwordBox.Text.Trim()));
+			sendMessage(serverStream, new Message(MsgType.createprofile, usernameBox.Text.Trim(), passwordBox.Text.Trim()));
 
 			this.Close();
 		}

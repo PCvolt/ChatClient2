@@ -5,7 +5,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using ProtoBuf;
-
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.Text.Json;
 
 public struct Client
 {
@@ -21,25 +24,25 @@ public struct Client
 	}
 };
 
-[ProtoContract]
+[DataContract(Name = "MsgType")]
 public enum MsgType
 {
-	[ProtoEnum] createprofile	= 0,
-	[ProtoEnum] login			= 1,
-	[ProtoEnum] listtopics		= 2,
-	[ProtoEnum] createtopic		= 3,
-	[ProtoEnum] jointopic		= 4,
-	[ProtoEnum] sendmsg			= 5,
-	[ProtoEnum] sendprivmsg		= 6,
-	[ProtoEnum] help			= 7
+	[EnumMember] createprofile = 0,
+	[EnumMember] login = 1,
+	[EnumMember] listtopics = 2,
+	[EnumMember] createtopic = 3,
+	[EnumMember] jointopic = 4,
+	[EnumMember] sendmsg = 5,
+	[EnumMember] sendprivmsg = 6,
+	[EnumMember] help = 7
 }
 
-[ProtoContract]
+[DataContract]
 public struct Message
 {
-	[ProtoMember(1)] public MsgType Mymsgtype { get; set; }
-	[ProtoMember(2)] public string S1 { get; set; }
-	[ProtoMember(3)] public string S2 { get; set; }
+	[DataMember] public MsgType Mymsgtype { get; set; }
+	[DataMember] public string S1 { get; set; }
+	[DataMember] public string S2 { get; set; }
 
 	public Message(MsgType msgtype, string s1, string s2)
 	{
@@ -104,10 +107,13 @@ namespace ChatClient2
 		static Message receiveMessage(TcpClient s)
 		{
 			NetworkStream ns = s.GetStream();
-			Message deserializedMessage = Serializer.Deserialize<Message>(ns);
+			byte[] bytesFrom = new byte[1024];
+			ns.Read(bytesFrom, 0, bytesFrom.Length);
+			Utf8JsonReader utf8Reader = new Utf8JsonReader(bytesFrom);
 
-			return deserializedMessage;
+			return JsonSerializer.Deserialize<Message>(ref utf8Reader);
 		}
+
 
 		private void readFromServer()
 		{
@@ -169,15 +175,16 @@ namespace ChatClient2
 		/* SENDING DATA FUNCTIONS */
 		static void sendMessage(NetworkStream ns, Message myMessage)
 		{
-			Serializer.Serialize(ns, myMessage);
-			Console.WriteLine(ns.Length);
+			Byte[] jsonUtf8Bytes = JsonSerializer.SerializeToUtf8Bytes(myMessage);
+
+			ns.Write(jsonUtf8Bytes, 0, jsonUtf8Bytes.Length);
 		}
-		
+
 		/* EVENTS FOR SENDING DATA */
 		private void sendButton_Click(object sender, EventArgs e)
 		{
 			// Write data to server
-			sendMessage(serverStream, new Message(parse(msgBox.Text), msgBox.Text, null));
+			sendMessage(serverStream, new Message(parse(msgBox.Text), msgBox.Text.Trim(), null));
 			
 			msgBox.Text = "";
 			msgBox.Focus();
@@ -197,3 +204,5 @@ namespace ChatClient2
 		}
 	}
 }
+
+//check if the server is down

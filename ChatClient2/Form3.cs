@@ -1,6 +1,7 @@
 ﻿using ProtoBuf;
 using System;
 using System.Net.Sockets;
+using System.Text.Json;
 using System.Windows.Forms;
 
 namespace ChatClient2
@@ -17,7 +18,9 @@ namespace ChatClient2
 
 		static void sendMessage(NetworkStream ns, Message myMessage)
 		{
-			Serializer.Serialize(ns, myMessage);
+			Byte[] jsonUtf8Bytes = JsonSerializer.SerializeToUtf8Bytes(myMessage);
+
+			ns.Write(jsonUtf8Bytes, 0, jsonUtf8Bytes.Length);
 		}
 
 		private void loginBtn_Click(object sender, EventArgs e)
