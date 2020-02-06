@@ -85,6 +85,7 @@
 			this.listChannels.Name = "listChannels";
 			this.listChannels.Size = new System.Drawing.Size(120, 199);
 			this.listChannels.TabIndex = 4;
+			this.listChannels.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listChannels_MouseClick);
 			// 
 			// listUsers
 			// 
@@ -117,14 +118,14 @@
 			// createProfileToolStripMenuItem
 			// 
 			this.createProfileToolStripMenuItem.Name = "createProfileToolStripMenuItem";
-			this.createProfileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.createProfileToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
 			this.createProfileToolStripMenuItem.Text = "Create Profile";
 			this.createProfileToolStripMenuItem.Click += new System.EventHandler(this.createProfileToolStripMenuItem_Click);
 			// 
 			// loginToolStripMenuItem
 			// 
 			this.loginToolStripMenuItem.Name = "loginToolStripMenuItem";
-			this.loginToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.loginToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
 			this.loginToolStripMenuItem.Text = "Login";
 			this.loginToolStripMenuItem.Click += new System.EventHandler(this.loginToolStripMenuItem_Click);
 			// 

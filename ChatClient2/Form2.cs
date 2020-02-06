@@ -1,5 +1,6 @@
 ﻿using ProtoBuf;
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Windows.Forms;
@@ -10,6 +11,7 @@ namespace ChatClient2
 	public partial class CreateProfile : Form
 	{
 		NetworkStream serverStream = null;
+		List<string> ls = new List<String>();
 
 		public CreateProfile(NetworkStream ns)
 		{
@@ -26,9 +28,17 @@ namespace ChatClient2
 
 		private void createProfileBtn_Click(object sender, EventArgs e)
 		{
-			sendMessage(serverStream, new Message(MsgType.createprofile, usernameBox.Text.Trim(), passwordBox.Text.Trim()));
+			ls[0] = usernameBox.Text.Trim();
+			ls[1] = passwordBox.Text.Trim();
+			sendMessage(serverStream, new Message(MsgType.createprofile, ls));
 
 			this.Close();
+		}
+
+		private void CreateProfile_Load(object sender, EventArgs e)
+		{
+			ls.Add("");
+			ls.Add("");
 		}
 	}
 }

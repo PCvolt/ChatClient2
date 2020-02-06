@@ -2,28 +2,12 @@
 using System.IO;
 using System.Windows.Forms;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using ProtoBuf;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
 using System.Text.Json;
+using System.Collections.Generic;
 
-public struct Client
-{
-	public TcpClient s;
-	public String username;
-	public String topic;
-
-	public Client(TcpClient client, String usn, String tpc)
-	{
-		this.s = client;
-		this.username = usn;
-		this.topic = tpc;
-	}
-};
-
+#region Data structures
 [DataContract(Name = "MsgType")]
 public enum MsgType
 {
@@ -31,26 +15,41 @@ public enum MsgType
 	[EnumMember] login = 1,
 	[EnumMember] listtopics = 2,
 	[EnumMember] createtopic = 3,
-	[EnumMember] jointopic = 4,
+	[EnumMember] listusers = 4,
 	[EnumMember] sendmsg = 5,
 	[EnumMember] sendprivmsg = 6,
-	[EnumMember] help = 7
+	[EnumMember] switchtopic = 7,
+	[EnumMember] help = 8
 }
 
-[DataContract]
 public struct Message
 {
-	[DataMember] public MsgType Mymsgtype { get; set; }
-	[DataMember] public string S1 { get; set; }
-	[DataMember] public string S2 { get; set; }
+	public MsgType Mymsgtype { get; set; }
+	public List<string> S { get; set; }
+	public string Topic { get; set; }
 
-	public Message(MsgType msgtype, string s1, string s2)
+	public Message(MsgType msgtype, List<string> listofString, string tpc = null)
 	{
 		this.Mymsgtype = msgtype;
-		this.S1 = s1;
-		this.S2 = s2;
+		this.S = new List<string>(listofString);
+		this.Topic = tpc;
 	}
 }
+
+public struct Client
+{
+	public TcpClient s;
+	public string username;
+	public string topic;
+
+	public Client(TcpClient client, string usn, string tpc = "#welcome")
+	{
+		this.s = client;
+		this.username = usn;
+		this.topic = tpc;
+	}
+};
+#endregion
 
 namespace ChatClient2
 {
@@ -59,10 +58,13 @@ namespace ChatClient2
 		TcpClient clientSocket = new TcpClient();
 		NetworkStream serverStream = null;
 
+		Client c = new Client();
+		List<string> ls = new List<string>();
+		Dictionary<string, string> backlogs = new Dictionary<string, string>();
+
 		public Form1()
 		{
 			InitializeComponent();
-			msgBox.Focus();
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
@@ -71,9 +73,11 @@ namespace ChatClient2
 			if (res == 0)
 			{
 				msgBox.Focus();
+				c.topic = "#welcome";
 				updateChatBox("Client Started");
 				label1.Text = "Connected to server.";
 				serverStream = clientSocket.GetStream();
+				ls.Add("");
 
 
 				Thread t = new Thread(readFromServer);
@@ -121,22 +125,28 @@ namespace ChatClient2
 			{
 				while (true)
 				{
-					// Read data from server separately
-					//MsgType returnType = (MsgType) Int32.Parse(readData(clientSocket));
 					Message myMessage = receiveMessage(clientSocket);
-					updateChatBox(myMessage.S1);
-					/*
-					switch ((MsgType) Int32.Parse(returndata))
-					{
-						case MsgType.listtopics:
-							listChannels.Items.Clear();
-							listChannels.Items.Add(returndata);
-							break;
 
-						default:
-							updateChatBox(returndata);
+					switch (myMessage.Mymsgtype)
+					{
+						case MsgType.sendmsg:
+							{
+								updateChatBox(myMessage.S[0]);
+								
+							}
 							break;
-					}*/
+						case MsgType.switchtopic:
+							break;
+						case MsgType.listtopics:
+							updateTopics(myMessage.S);
+							break;
+						case MsgType.listusers:
+							updateUserlist(myMessage.S);
+							break;
+						default:
+							updateChatBox(myMessage.S[0]);
+							break;
+					}
 				}
 			}
 			catch (IOException ignore) { }
@@ -145,10 +155,33 @@ namespace ChatClient2
 				clientSocket.Close();
 			}
 		}
+		private void updateUserlist(List<string> S)
+		{
+			listChannels.Invoke(new Action(() => listUsers.Items.Clear()));
+			foreach (string t in S)
+				listChannels.Invoke(new Action(() => listUsers.Items.Add(t)));
+		}
+
+		private void updateTopics(List<string> S)
+		{
+			foreach (string t in S)
+			{
+				if (!backlogs.ContainsKey(t))
+				{
+					backlogs.Add(t, "");
+				}
+			}
+
+			listChannels.Invoke(new Action(() => listChannels.Items.Clear()));
+			foreach (string t in S)
+			{
+				listChannels.Invoke(new Action(() => listChannels.Items.Add(t)));
+			}
+		}
 
 		private void updateChatBox(string message)
 		{
-			chatBox.Invoke(new Action(() => chatBox.Text += message + Environment.NewLine));
+			chatBox.Invoke(new Action(() => chatBox.Text += message + " " + Environment.NewLine));
 		}
 
 		private MsgType parse(string message)
@@ -161,8 +194,6 @@ namespace ChatClient2
 					return MsgType.createtopic;
 				case "/listtopics":
 					return MsgType.listtopics;
-				case "/jointopic":
-					return MsgType.jointopic;
 				case "/sendprivmsg":
 					return MsgType.sendprivmsg;
 				case "/help":
@@ -184,8 +215,9 @@ namespace ChatClient2
 		private void sendButton_Click(object sender, EventArgs e)
 		{
 			// Write data to server
-			sendMessage(serverStream, new Message(parse(msgBox.Text), msgBox.Text.Trim(), null));
-			
+			ls[0] = msgBox.Text.Trim();
+			sendMessage(serverStream, new Message(parse(msgBox.Text), ls, c.topic));
+
 			msgBox.Text = "";
 			msgBox.Focus();
 		}
@@ -202,7 +234,24 @@ namespace ChatClient2
 			Login createProfileForm = new Login(serverStream);
 			createProfileForm.Show();
 		}
+
+		private void listChannels_MouseClick(object sender, MouseEventArgs e)
+		{
+			string index_s = this.listChannels.GetItemText(listChannels.SelectedItem);
+
+			if (!index_s.Equals(""))
+			{
+				c.topic = index_s;
+			}
+		}
 	}
 }
 
-//check if the server is down
+
+/*
+ * Disconnect properly
+ * Hash password
+ * list of channels not read in debug
+ * DM (peer to peer ? Channel dédié et non joignable ?)
+ * Logs (clear la console, renvoyer les X derniers messages))
+*/

@@ -1,5 +1,6 @@
 ﻿using ProtoBuf;
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Windows.Forms;
@@ -9,6 +10,7 @@ namespace ChatClient2
 	public partial class Login : Form
 	{
 		NetworkStream serverStream = null;
+		List<string> ls = new List<String>();
 
 		public Login(NetworkStream ns)
 		{
@@ -25,9 +27,17 @@ namespace ChatClient2
 
 		private void loginBtn_Click(object sender, EventArgs e)
 		{
-			sendMessage(serverStream, new Message(MsgType.login, usernameBox.Text.Trim(), passwordBox.Text.Trim()));
+			ls[0] = usernameBox.Text.Trim();
+			ls[1] = passwordBox.Text.Trim();
+			sendMessage(serverStream, new Message(MsgType.login, ls));
 
 			this.Close();
+		}
+
+		private void Login_Load(object sender, EventArgs e)
+		{
+			ls.Add("");
+			ls.Add("");
 		}
 	}
 }

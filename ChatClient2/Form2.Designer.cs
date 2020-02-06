@@ -91,6 +91,7 @@
 			this.Controls.Add(this.usernameBox);
 			this.Name = "CreateProfile";
 			this.Text = "Create Profile";
+			this.Load += new System.EventHandler(this.CreateProfile_Load);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
